@@ -1,0 +1,27 @@
+#include <avr/io.h>
+#include <util/delay.h>
+#include <stdbool.h>
+
+int main(void) {
+    bool f = 0;
+    bool Q = 0, R = 0, S = 0;
+    DDRD = 0b00000100; // PD2 as output
+    PORTD = 0b11100000; // Set internal pull-ups for PD5, PD6, PD7
+    while (1) {
+	Q= (PIND & (1 << PIND5)) == (1 << PIND5);
+        R = (PIND & (1 << PIND6)) == (1 << PIND6);
+        S = (PIND & (1 << PIND7)) == (1 << PIND7);
+        f =(!Q&&!R&&S) ||(!Q&&R&&!S)||(Q&&!R&&!S) || (Q&&R&&S);
+
+        PORTD = (f << 2);
+
+        if (f) {
+            PORTD |= ~(1 << PD2); // Turn on PD2 when y is 1
+        } else {
+            PORTD &= (1 << PD2); // Turn off PD2 when y is not 1
+        }
+
+        _delay_ms(200L);
+    }
+    return 0;
+}
